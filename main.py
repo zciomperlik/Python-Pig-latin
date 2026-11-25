@@ -1,52 +1,36 @@
-def message_to_words(message):
-  words = []
-  word = ""
-  for i in message.lower():
-    if i != " ":
-      word += i
+VOWELS = "aeiou"
+PUNCTUATION = ".,?!"
+
+
+def translate_word(word):
+    """Convert a single word to Pig Latin, keeping trailing punctuation and numbers intact."""
+    core = word.rstrip(PUNCTUATION)
+    trailing = word[len(core):]
+
+    # Leave empty fragments and anything containing digits untouched
+    if not core or any(char.isdigit() for char in core):
+        return word
+
+    lower = core.lower()
+
+    if lower[0] in VOWELS:
+        result = lower + "yay"
     else:
-      words.append(word)
-      word = ""
-  words.append(word)
-  return words
+        # Treat 'y' as a vowel only when the word has no other vowels (e.g. "rhythm")
+        vowel_chars = VOWELS if any(char in VOWELS for char in lower) else VOWELS + "y"
+        split = next((i for i, char in enumerate(lower) if char in vowel_chars), len(lower))
+        result = lower[split:] + lower[:split] + "ay"
 
-def words_to_latin(words):
-  vowels = "aeiou"
-  end = ""
-  final_message = ""
+    return result + trailing
 
-  for word in words:
-    #does word have y as vowel?
-    if not any(char in vowels for char in word):
-      vowels += "y"
-    
-    #is first letter vowel with/without punctuation?
-    if word[0] in vowels and any(char in ".,?!" for char in word):
-      final_message += word[:-1] + "yay" + word[-1] + " "
-    elif word[0] in vowels:
-      final_message += word + "yay "
-    
-    #is word a number?
-    elif any(char.isdigit() for char in word):
-      final_message += word + " "
-      
-    #if word is normal word with/without punctuation
-    else:
-      for i in word:
-        if i in vowels:
-          if any(char in ".,?!" for char in word):
-            final_message += word[:-1] + end + "ay" + word[-1] + " "
-          else:
-            final_message += word + end + "ay "
-          end = ""
-          break
-        else:
-          end += i
-          word = word[1:]
-    vowels = "aeiou"
-  return final_message
 
-message = input("Enter text to be converted into Pig Latin: ")
-print("\n")
+def to_pig_latin(text):
+    """Convert a whole sentence, ignoring extra spaces."""
+    return " ".join(translate_word(word) for word in text.split())
 
-print(words_to_latin(message_to_words(message)))
+
+if __name__ == "__main__":
+    text = input("Enter text to be converted into Pig Latin: ")
+    result = to_pig_latin(text)
+    # input() shows the result and holds the window open until Enter is pressed
+    input(result + "\n\nPress Enter to close...")
